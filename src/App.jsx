@@ -18,6 +18,18 @@ function App() {
         temperature: 28,
         condition: "Cloudy",
       },
+      chennai: {
+        temperature: 32,
+        condition: "Sunny",
+      },
+      kolkata: {
+        temperature: 29,
+        condition: "Rainy",
+      },
+      bangalore: {
+        temperature: 27,
+        condition: "Cloudy",
+      }
     };
 
     const result = data[city.toLowerCase()];
