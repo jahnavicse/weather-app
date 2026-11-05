@@ -1,4 +1,4 @@
-name: Weather App CI-CD
+name: Weather App CI/CD
 
 on:
   push:
@@ -6,53 +6,44 @@ on:
       - main
 
 jobs:
-
-  build:
-
+  build-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Install Dependencies
-        run: npm install
-
-      - name: Build Project
-        run: npm run build
-
-  test:
-
-    needs: build
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run Tests
         run: npm test
 
+      - name: Build Application
+        run: npm run build
+
   deploy:
-
-    needs: test
-
+    needs: build-test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger Deployment
-        run: echo "Vercel automatically deploys from GitHub"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Vercel
+        run: npm install -g vercel
+
+      - name: Deploy
+        run: |
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
